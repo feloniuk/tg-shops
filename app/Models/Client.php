@@ -3,9 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
 {
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'user_id', 
+        'company_name', 
+        'phone', 
+        'plan_id', 
+        'plan_expires_at'
+    ];
+
+    protected $casts = [
+        'plan_expires_at' => 'datetime'
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -21,9 +37,19 @@ class Client extends Model
         return $this->hasMany(Shop::class);
     }
 
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
     // Проверка лимитов
     public function canCreateShop(): bool
     {
         return $this->shops()->count() < $this->plan->max_shops;
+    }
+
+    public function isSubscriptionActive(): bool
+    {
+        return $this->plan_expires_at && $this->plan_expires_at->isFuture();
     }
 }

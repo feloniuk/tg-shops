@@ -21,4 +21,16 @@ class ShopRepository
     {
         return $shop->update($data);
     }
+
+    public function findActiveShopsByClient(int $clientId): Collection
+    {
+        return Shop::where('client_id', $clientId)
+            ->where('status', 'active')
+            ->get();
+    }
+
+    public function countByClient(int $clientId): int
+    {
+        return Shop::where('client_id', $clientId)->count();
+    }
 }

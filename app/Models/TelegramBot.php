@@ -13,7 +13,7 @@ class TelegramBot extends Model
         'shop_id', 
         'bot_token', 
         'bot_username', 
-        'is_active', 
+        'is_active',
         'webhook_info'
     ];
 
@@ -25,5 +25,10 @@ class TelegramBot extends Model
     public function shop()
     {
         return $this->belongsTo(Shop::class);
+    }
+
+    public function isWebhookConfigured(): bool
+    {
+        return !empty($this->webhook_info);
     }
 }
