@@ -6,34 +6,46 @@ use App\Models\Client;
 use OpenAI\Client as OpenAIClient;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+
 class AIGeneratorService
 {
-    /**
-     * @var \OpenAI\Client
-     */
-    private $openai;
-
-    /**
-     * @param \OpenAI\Client $openai
-     */
-    public function __construct($openai)
-    {
-        $this->openai = $openai;
-    }
+    public function __construct(
+        private OpenAIClient $openai
+    ) {}
 
     public function generateProductDescription(Client $client, array $productData): ?string
     {
-        $cacheKey = 'product_description_' . md5($productData['name'] ?? json_encode($productData));
+        // Проверка доступности ИИ для тарифа
+        if (!$client->plan->ai_enabled) {
+            Log::warning('AI generation not allowed for current plan', [
+                'client_id' => $client->id,
+                'plan' => $client->plan->name
+            ]);
+            return null;
+        }
+
+        $cacheKey = 'ai_product_description_' . md5(json_encode($productData));
 
         return Cache::remember($cacheKey, now()->addDays(7), function () use ($productData) {
             try {
-                $response = $this->openai->completions()->create([
+                $prompt = $this->buildComprehensivePrompt($productData);
+                
+                $response = $this->openai->chat()->create([
                     'model' => 'gpt-3.5-turbo',
-                    'prompt' => $this->buildPrompt($productData),
-                    'max_tokens' => 150
+                    'messages' => [
+                        [
+                            'role' => 'system', 
+                            'content' => 'You are a professional product description writer.'
+                        ],
+                        [
+                            'role' => 'user', 
+                            'content' => $prompt
+                        ]
+                    ],
+                    'max_tokens' => 250
                 ]);
 
-                return $response['choices'][0]['text'] ?? null;
+                return $response->choices[0]->message->content ?? null;
             } catch (\Exception $e) {
                 Log::error('AI Description Generation Failed', [
                     'error' => $e->getMessage(),
@@ -45,10 +57,58 @@ class AIGeneratorService
         });
     }
 
-    public function buildPrompt(array $productData): string
+    public function generateShopGreeting(Client $client, array $shopData): ?string
     {
-        return "Create a compelling product description for a product named '{$productData['name']}' " .
-               "with the following details: " . 
-               json_encode($productData);
+        if (!$client->plan->ai_enabled) {
+            return null;
+        }
+
+        $cacheKey = 'ai_shop_greeting_' . md5(json_encode($shopData));
+
+        return Cache::remember($cacheKey, now()->addDays(7), function () use ($shopData) {
+            try {
+                $prompt = $this->buildShopGreetingPrompt($shopData);
+                
+                $response = $this->openai->chat()->create([
+                    'model' => 'gpt-3.5-turbo',
+                    'messages' => [
+                        [
+                            'role' => 'system', 
+                            'content' => 'You are a friendly and professional shop assistant.'
+                        ],
+                        [
+                            'role' => 'user', 
+                            'content' => $prompt
+                        ]
+                    ],
+                    'max_tokens' => 150
+                ]);
+
+                return $response->choices[0]->message->content ?? null;
+            } catch (\Exception $e) {
+                Log::error('AI Shop Greeting Generation Failed', [
+                    'error' => $e->getMessage(),
+                    'shop_data' => $shopData
+                ]);
+
+                return null;
+            }
+        });
+    }
+
+    private function buildComprehensivePrompt(array $productData): string
+    {
+        return "Create a compelling, SEO-friendly product description for a product with these details:\n" .
+               "- Product Name: {$productData['name']}\n" .
+               "- Key Details: " . json_encode($productData['details'] ?? []) . "\n" .
+               "Write in a professional tone, highlight key benefits, and include a call to action.";
+    }
+
+    private function buildShopGreetingPrompt(array $shopData): string
+    {
+        return "Create a warm and inviting greeting message for an online shop:\n" .
+               "- Shop Name: {$shopData['name']}\n" .
+               "- Shop Type/Category: {$shopData['category'] ?? 'General'}\n" .
+               "Create a welcoming message that reflects the shop's personality and encourages customers to explore.";
     }
 }
