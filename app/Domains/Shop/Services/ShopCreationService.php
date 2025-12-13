@@ -4,6 +4,7 @@ namespace App\Domains\Shop\Services;
 
 use App\Domains\Shop\Repositories\ShopRepository;
 use App\Domains\Shop\Services\ShopLimitService;
+use App\Domains\Telegram\Services\TelegramBotService;
 use App\Models\Client;
 use App\Models\Shop;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,8 @@ class ShopCreationService
 {
     public function __construct(
         private ShopRepository $shopRepository,
-        private ShopLimitService $shopLimitService
+        private ShopLimitService $shopLimitService,
+        private TelegramBotService $telegramBotService
     ) {}
 
     public function createShop(Client $client, array $data): Shop
@@ -40,10 +42,10 @@ class ShopCreationService
 
     private function registerTelegramBot(Shop $shop, string $botToken)
     {
-        // Логика регистрации Telegram Bot
-        $shop->telegramBot()->create([
-            'bot_token' => $botToken,
-            'is_active' => true
-        ]);
+        // Генерируем URL для webhook
+        $webhookUrl = route('telegram.webhook', ['botToken' => $botToken]);
+
+        // Регистрируем webhook в Telegram
+        $this->telegramBotService->registerWebhook($shop, $webhookUrl);
     }
 }

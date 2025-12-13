@@ -4,7 +4,7 @@
             @click="sidebarOpen = !sidebarOpen" 
             class="text-gray-500 focus:outline-none lg:hidden"
         >
-            <x-heroicon-o-menu-alt-2 class="h-6 w-6" />
+            <x-heroicon-o-bars-3 class="h-6 w-6" />
         </button>
     </div>
 

@@ -1,59 +1,242 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Telegram Shops - SaaS Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+SaaS платформа для создания магазинов в Telegram с управлением заказами, товарами и интеграцией с платежными системами.
 
-## About Laravel
+## 🚀 Возможности
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- ✅ Регистрация и авторизация (Email + Password)
+- ✅ Управление магазинами Telegram
+- ✅ Каталог товаров с категориями
+- ✅ Telegram Bot интеграция (корзина, оформление заказов)
+- ✅ Управление заказами
+- ✅ AI-генерация описаний товаров (OpenAI)
+- ✅ Тарифные планы (Free, Base, Pro)
+- ✅ Интеграция с Stripe для оплаты
+- ✅ Админ-панель
+- ✅ Многоязычность (EN, UA)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Требования
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Composer
+- SQLite (или MySQL)
+- Node.js & NPM (для фронтенда)
 
-## Learning Laravel
+## 🛠️ Установка (Локально)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 1. Клонирование и установка зависимостей
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# Установить PHP зависимости
+composer install
 
-## Laravel Sponsors
+# Установить Node.js зависимости
+npm install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Настройка окружения
 
-### Premium Partners
+```bash
+# Скопировать .env.example в .env
+copy .env.example .env
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# Сгенерировать ключ приложения
+php artisan key:generate
+```
 
-## Contributing
+### 3. Настройка .env файла
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Откройте `.env` и настройте:
 
-## Code of Conduct
+```env
+APP_NAME="TG Shops"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# База данных (SQLite по умолчанию)
+DB_CONNECTION=sqlite
 
-## Security Vulnerabilities
+# OpenAI для AI-генерации (опционально)
+OPENAI_API_KEY=your_openai_key_here
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Stripe для платежей (опционально для тестирования)
+STRIPE_KEY=your_stripe_public_key
+STRIPE_SECRET=your_stripe_secret_key
+```
 
-## License
+### 4. Создание базы данных
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+# Для SQLite создайте пустой файл
+type nul > database\database.sqlite
+
+# Запустить миграции
+php artisan migrate --force
+
+# Запустить seeder-ы для базовых данных
+php artisan db:seed --class=PlanSeeder
+php artisan db:seed --class=RoleAndPermissionSeeder
+
+# Запустить демо данные (опционально)
+php artisan db:seed --class=DemoDataSeeder
+```
+
+### 5. Сборка фронтенда
+
+```bash
+# Development
+npm run dev
+
+# Production
+npm run build
+```
+
+### 6. Запуск сервера
+
+```bash
+php artisan serve
+```
+
+Приложение будет доступно по адресу: `http://localhost:8000`
+
+## 👤 Демо учетные записи
+
+После запуска `DemoDataSeeder`:
+
+| Роль | Email | Пароль |
+|------|-------|--------|
+| Админ | admin@example.com | password |
+| Клиент | client@example.com | password |
+
+## 🤖 Настройка Telegram Bot
+
+### 1. Создание бота
+
+1. Откройте [@BotFather](https://t.me/BotFather) в Telegram
+2. Отправьте `/newbot`
+3. Следуйте инструкциям для создания бота
+4. Сохраните токен бота (формат: `1234567890:ABCdefGHIjklMNOpqrsTUVwxyz`)
+
+### 2. Настройка бота в приложении
+
+1. Войдите как клиент (client@example.com)
+2. Перейдите в "Магазины"
+3. Откройте магазин
+4. Добавьте Telegram Bot Token
+5. Сохраните
+
+### 3. Настройка Webhook (для продакшена)
+
+Для локального тестирования используйте:
+- [ngrok](https://ngrok.com/) для создания публичного URL
+- Webhook автоматически регистрируется при добавлении токена
+
+```bash
+# Запустите ngrok
+ngrok http 8000
+
+# Используйте https URL от ngrok как APP_URL в .env
+```
+
+## 📂 Структура проекта
+
+```
+app/
+├── Domains/               # Domain-Driven Design
+│   ├── AI/               # AI генерация
+│   ├── Billing/          # Оплата (Stripe)
+│   ├── Shop/             # Магазины
+│   ├── Product/          # Товары
+│   ├── Telegram/         # Telegram интеграция
+│   └── Support/          # Поддержка
+├── Http/Controllers/     # Контроллеры
+├── Models/               # Eloquent модели
+└── Policies/             # Политики доступа
+
+database/
+├── migrations/           # Миграции БД
+└── seeders/             # Seeder-ы
+
+resources/
+├── views/               # Blade шаблоны
+└── js/                  # Frontend (Alpine.js)
+
+routes/
+├── web.php             # Web маршруты
+└── auth.php            # Auth маршруты
+```
+
+## 🔑 Основные маршруты
+
+### Веб-интерфейс
+- `/` - Главная страница
+- `/login` - Вход
+- `/register` - Регистрация
+- `/shops` - Магазины (требует авторизации)
+- `/shops/{shop}/products` - Товары магазина
+- `/shops/{shop}/orders` - Заказы магазина
+- `/admin` - Админ-панель (только для админов)
+
+### API
+- `POST /telegram/webhook/{botToken}` - Telegram webhook
+
+## ⚙️ Конфигурация
+
+### Rate Limiting
+
+- Billing endpoints: 10 запросов/минуту
+- AI генерация: 20 запросов/минуту
+
+### Кеш и Очереди
+
+По умолчанию используется `database` драйвер.
+
+Для продакшена рекомендуется Redis:
+```env
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+```
+
+## 🧪 Тестирование
+
+### Базовый flow тестирования:
+
+1. **Регистрация клиента**
+   - Перейдите на `/register`
+   - Создайте аккаунт
+
+2. **Создание магазина**
+   - Войдите как клиент
+   - Создайте новый магазин
+   - Добавьте Telegram Bot Token
+
+3. **Добавление товаров**
+   - Создайте категории
+   - Добавьте товары с описаниями и ценами
+
+4. **Тестирование Telegram бота**
+   - Откройте вашего бота в Telegram
+   - Отправьте `/start`
+   - Проверьте каталог, корзину, оформление заказа
+
+5. **Управление заказами**
+   - Просмотрите заказы в веб-интерфейсе
+   - Измените статусы заказов
+
+## 🚧 Roadmap (не реализовано)
+
+- [ ] Google OAuth авторизация
+- [ ] Полноценное API с токенами
+- [ ] Статистика и аналитика
+- [ ] Email уведомления
+- [ ] Экспорт заказов
+- [ ] Множественные изображения товаров
+
+## 📝 Лицензия
+
+MIT License
+
+## 🤝 Поддержка
+
+Для вопросов и поддержки создайте Issue в репозитории.

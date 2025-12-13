@@ -5,39 +5,40 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AIController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ShopManagementController;
+use App\Http\Controllers\Telegram\TelegramWebhookController;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-Route::group([
-    'prefix' => LaravelLocalization::setLocale(),
-    'middleware' => [ 
-        'localeSessionRedirect', 
-        'localizationRedirect', 
-        'localeViewPath' 
-    ]
-], function() {
-    Route::get('/', [HomeController::class, 'index'])
-        ->name('home');
+// Telegram Webhook (outside localization group)
+Route::post('/telegram/webhook/{botToken}', [TelegramWebhookController::class, 'handle'])
+    ->name('telegram.webhook');
 
-    // Billing Routes
-    Route::middleware(['auth'])->group(function () {
+// Home route
+Route::get('/', [HomeController::class, 'index'])
+    ->name('home');
+
+// Billing Routes
+    Route::middleware(['auth', 'throttle:10,1'])->group(function () {
         Route::post('/billing/checkout', [BillingController::class, 'createCheckout'])
             ->name('billing.checkout');
-        
+
         Route::get('/billing/success/{client}', [BillingController::class, 'successPayment'])
             ->name('billing.success');
-        
+
         Route::get('/billing/cancel/{client}', [BillingController::class, 'cancelPayment'])
             ->name('billing.cancel');
     });
     
-    // Stripe Webhook
-    Route::post('/stripe/webhook', [BillingController::class, 'handleWebhook'])
-        ->name('stripe.webhook');
+// Stripe Webhook
+Route::post('/stripe/webhook', [BillingController::class, 'handleWebhook'])
+    ->name('stripe.webhook');
 
+// Protected routes - require authentication
+Route::middleware(['auth'])->group(function () {
     // Shops
     Route::get('/shops', [ShopController::class, 'index'])->name('shops.index');
     Route::post('/shops', [ShopController::class, 'store'])->name('shops.store');
@@ -47,14 +48,20 @@ Route::group([
     Route::get('/shops/{shop}/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/shops/{shop}/products', [ProductController::class, 'store'])->name('products.store');
 
-    // AI
-    Route::prefix('ai')->group(function() {
+    // Orders
+    Route::get('/shops/{shop}/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/shops/{shop}/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::put('/shops/{shop}/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+
+    // AI (with rate limiting to prevent abuse)
+    Route::prefix('ai')->middleware(['throttle:20,1'])->group(function() {
         Route::post('/generate-product-description', [AIController::class, 'generateProductDescription'])
             ->name('ai.generate-description');
-        
+
         Route::post('/generate-shop-greeting', [AIController::class, 'generateShopGreeting'])
             ->name('ai.generate-greeting');
     });
+});
 
     // Admin Routes
     Route::prefix('admin')
@@ -88,4 +95,3 @@ Route::group([
                 ->name('shops.update-status');
         });
     });
-});
