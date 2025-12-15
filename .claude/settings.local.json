@@ -5,7 +5,15 @@
       "Bash(composer install:*)",
       "Bash(npm run build:*)",
       "Bash(npm install)",
-      "Bash(composer require:*)"
+      "Bash(composer require:*)",
+      "WebFetch(domain:tgmarketkit.site)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(test:*)",
+      "Bash(cat:*)",
+      "Bash(del configlaravellocalization.php)"
     ]
   }
 }

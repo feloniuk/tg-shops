@@ -23,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'ensure.client' => EnsureUserHasClient::class,
         ]);
+
+        // Add localization middleware to web group
+        $middleware->web(append: [
+            LocalizationMiddleware::class,
+        ]);
     })
     ->withExceptions(function ($exceptions): void {
         //

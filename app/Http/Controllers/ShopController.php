@@ -18,12 +18,37 @@ class ShopController extends Controller
         private ShopRepository $shopRepository
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $client = Auth::user()->client;
+        $user = Auth::user();
+        $client = $user->client;
+
+        // Auto-create client if doesn't exist
+        if (!$client) {
+            $freePlan = \App\Models\Plan::whereIn('name', ['Free', 'No Plan'])->first();
+
+            if (!$freePlan) {
+                return redirect()->route('home')->with('error', 'Please contact support to activate your account.');
+            }
+
+            $client = \App\Models\Client::create([
+                'user_id' => $user->id,
+                'company_name' => $user->name,
+                'plan_id' => $freePlan->id,
+                'plan_expires_at' => now()->addYear(),
+            ]);
+
+            $user->load('client');
+        }
+
         $shops = $this->shopRepository->findByClientId($client->id);
 
-        return response()->json($shops);
+        // Return JSON for API requests, view for web
+        if ($request->wantsJson()) {
+            return response()->json($shops);
+        }
+
+        return view('shops.index', compact('shops', 'client'));
     }
 
     public function store(Request $request)
@@ -35,20 +60,38 @@ class ShopController extends Controller
             'footer_message' => 'nullable|string'
         ]);
 
-        $client = Auth::user()->client;
+        $user = Auth::user();
+        $client = $user->client;
+
+        if (!$client) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Client profile not found. Please complete your profile.',
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Client profile not found.');
+        }
 
         try {
             $shop = $this->shopCreationService->createShop($client, $validated);
 
-            return response()->json([
-                'message' => 'Shop created successfully',
-                'shop' => $shop
-            ], 201);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Shop created successfully',
+                    'shop' => $shop
+                ], 201);
+            }
+
+            return redirect()->route('shops.index')->with('success', 'Shop created successfully!');
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Shop creation failed',
-                'error' => $e->getMessage()
-            ], 400);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Shop creation failed',
+                    'error' => $e->getMessage()
+                ], 400);
+            }
+
+            return redirect()->back()->with('error', 'Failed to create shop: ' . $e->getMessage());
         }
     }
 

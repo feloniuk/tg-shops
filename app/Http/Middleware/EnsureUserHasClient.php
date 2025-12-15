@@ -16,10 +16,20 @@ class EnsureUserHasClient
 
         if (!$user->client) {
             // Создаем клиента, если его нет
+            $freePlan = Plan::whereIn('name', ['Free', 'No Plan'])->first();
+
+            if (!$freePlan) {
+                abort(500, 'Free plan not found. Please run database seeders.');
+            }
+
             $client = Client::create([
                 'user_id' => $user->id,
-                'plan_id' => Plan::where('name', 'No Plan')->first()->id
+                'company_name' => $user->name,
+                'plan_id' => $freePlan->id,
+                'plan_expires_at' => now()->addYear(),
             ]);
+
+            $user->load('client');
         }
 
         return $next($request);

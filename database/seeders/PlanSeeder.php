@@ -9,9 +9,12 @@ class PlanSeeder extends Seeder
 {
     public function run(): void
     {
+        // Clear existing plans
+        DB::table('plans')->delete();
+
         DB::table('plans')->insert([
             [
-                'name' => 'No Plan',
+                'name' => 'Free',
                 'max_shops' => 1,
                 'max_products' => 10,
                 'ai_enabled' => false,
@@ -31,7 +34,7 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Pro',
                 'max_shops' => 10,
-                'max_products' => PHP_INT_MAX,
+                'max_products' => 999999, // Unlimited (practically)
                 'ai_enabled' => true,
                 'price' => 29.99,
                 'created_at' => now(),

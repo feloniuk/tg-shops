@@ -15,6 +15,20 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
+        <!-- Language Switcher -->
+        <div class="absolute top-4 right-4">
+            <div class="flex items-center space-x-2">
+                <a href="{{ route('language.switch', 'uk') }}"
+                   class="px-3 py-1 text-sm rounded {{ app()->getLocale() == 'uk' ? 'bg-blue-600 text-white' : 'text-gray-700 bg-white hover:bg-gray-100' }}">
+                    UK
+                </a>
+                <a href="{{ route('language.switch', 'en') }}"
+                   class="px-3 py-1 text-sm rounded {{ app()->getLocale() == 'en' ? 'bg-blue-600 text-white' : 'text-gray-700 bg-white hover:bg-gray-100' }}">
+                    EN
+                </a>
+            </div>
+        </div>
+
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/">

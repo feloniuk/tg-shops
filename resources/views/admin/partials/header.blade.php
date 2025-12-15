@@ -8,7 +8,19 @@
         </button>
     </div>
 
-    <div class="flex items-center">
+    <div class="flex items-center space-x-4">
+        <!-- Language Switcher -->
+        <div class="flex items-center space-x-2">
+            <a href="{{ route('language.switch', 'uk') }}"
+               class="px-3 py-1 text-sm rounded {{ app()->getLocale() == 'uk' ? 'bg-blue-600 text-white' : 'text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600' }}">
+                UK
+            </a>
+            <a href="{{ route('language.switch', 'en') }}"
+               class="px-3 py-1 text-sm rounded {{ app()->getLocale() == 'en' ? 'bg-blue-600 text-white' : 'text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600' }}">
+                EN
+            </a>
+        </div>
+
         <div x-data="{ dropdownOpen: false }" class="relative">
             <button 
                 @click="dropdownOpen = !dropdownOpen"

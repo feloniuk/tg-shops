@@ -13,6 +13,13 @@ class RoleAndPermissionSeeder extends Seeder
         // Очистка существующих ролей и разрешений
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // Очистка таблиц (удаление существующих данных)
+        \DB::table('model_has_permissions')->delete();
+        \DB::table('model_has_roles')->delete();
+        \DB::table('role_has_permissions')->delete();
+        Permission::query()->delete();
+        Role::query()->delete();
+
         // Permissions для клиентов
         $clientPermissions = [
             'create shop',
@@ -42,21 +49,33 @@ class RoleAndPermissionSeeder extends Seeder
         ];
 
         // Создание разрешений
-        collect($clientPermissions)
+        $allPermissions = collect($clientPermissions)
             ->merge($managerPermissions)
             ->merge($adminPermissions)
-            ->each(fn($permission) => Permission::create(['name' => $permission]));
+            ->unique()
+            ->toArray();
+
+        foreach ($allPermissions as $permission) {
+            Permission::create(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        // Очистка кеша после создания разрешений
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Создание ролей
         $clientRole = Role::create(['name' => 'client']);
-        $clientRole->syncPermissions($clientPermissions);
+        foreach ($clientPermissions as $permission) {
+            $clientRole->givePermissionTo($permission);
+        }
 
         $managerRole = Role::create(['name' => 'manager']);
-        $managerRole->syncPermissions($managerPermissions);
+        foreach ($managerPermissions as $permission) {
+            $managerRole->givePermissionTo($permission);
+        }
 
         $adminRole = Role::create(['name' => 'admin']);
-        $adminRole->syncPermissions(
-            array_merge($clientPermissions, $managerPermissions, $adminPermissions)
-        );
+        foreach ($allPermissions as $permission) {
+            $adminRole->givePermissionTo($permission);
+        }
     }
 }

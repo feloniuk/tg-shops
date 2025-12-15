@@ -10,18 +10,18 @@ class ShopManagementController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Shop::with('client');
+        $query = Shop::with('client.user');
 
         // Фильтрация
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $query->where('name', 'LIKE', "%{$request->search}%");
         }
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $shops = $query->paginate(20);
+        $shops = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         return view('admin.shops.index', [
             'shops' => $shops

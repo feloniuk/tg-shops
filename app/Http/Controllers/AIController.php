@@ -16,42 +16,74 @@ class AIController extends Controller
     public function generateProductDescription(Request $request)
     {
         $user = auth()->user();
-        $client = $user->client ?? Client::firstOrCreate(
-            ['user_id' => $user->id],
-            ['plan_id' => Plan::where('name', 'No Plan')->first()->id]
-        );
+        $client = $user->client;
+
+        // If client doesn't exist, create one with Free plan
+        if (!$client) {
+            $defaultPlan = Plan::where('name', 'Free')->first();
+            if (!$defaultPlan) {
+                return response()->json([
+                    'error' => 'Default plan not found. Please contact support.'
+                ], 500);
+            }
+
+            $client = Client::create([
+                'user_id' => $user->id,
+                'company_name' => $user->name,
+                'plan_id' => $defaultPlan->id,
+                'plan_expires_at' => now()->addYear(),
+            ]);
+        }
 
         $validated = $request->validate([
             'name' => 'required|string',
             'details' => 'nullable|array'
         ]);
 
-        $description = $this->aiGeneratorService->generateProductDescription(
-            $client, 
-            $validated
-        );
+        try {
+            $description = $this->aiGeneratorService->generateProductDescription(
+                $client,
+                $validated
+            );
 
-        return response()->json([
-            'description' => $description
-        ]);
+            return response()->json([
+                'description' => $description
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to generate description: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function generateShopGreeting(Request $request)
     {
+        $client = auth()->user()->client;
+
+        if (!$client) {
+            return response()->json([
+                'error' => 'Client profile not found. Please complete your profile first.'
+            ], 403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string',
             'category' => 'nullable|string'
         ]);
 
-        $client = auth()->user()->client;
+        try {
+            $greeting = $this->aiGeneratorService->generateShopGreeting(
+                $client,
+                $validated
+            );
 
-        $greeting = $this->aiGeneratorService->generateShopGreeting(
-            $client, 
-            $validated
-        );
-
-        return response()->json([
-            'greeting' => $greeting
-        ]);
+            return response()->json([
+                'greeting' => $greeting
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to generate greeting: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

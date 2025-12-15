@@ -15,6 +15,18 @@
                     <span class="text-2xl font-bold text-indigo-600">TG Shops</span>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <!-- Language Switcher -->
+                    <div class="flex items-center space-x-2 mr-2">
+                        <a href="{{ route('language.switch', 'uk') }}"
+                           class="px-3 py-1 text-sm rounded {{ app()->getLocale() == 'uk' ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            UK
+                        </a>
+                        <a href="{{ route('language.switch', 'en') }}"
+                           class="px-3 py-1 text-sm rounded {{ app()->getLocale() == 'en' ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            EN
+                        </a>
+                    </div>
+
                     @auth
                         <a href="{{ url('/shops') }}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                             My Shops

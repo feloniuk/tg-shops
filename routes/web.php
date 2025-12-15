@@ -10,12 +10,21 @@ use App\Http\Controllers\AIController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ShopManagementController;
+use App\Http\Controllers\Client\DashboardController as ClientDashboardController;
 use App\Http\Controllers\Telegram\TelegramWebhookController;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+use App\Http\Controllers\LanguageController;
 
-// Telegram Webhook (outside localization group)
+// Language Switcher
+Route::get('/language/{locale}', [LanguageController::class, 'switch'])
+    ->name('language.switch');
+
+// Telegram Webhook
 Route::post('/telegram/webhook/{botToken}', [TelegramWebhookController::class, 'handle'])
     ->name('telegram.webhook');
+
+// Stripe Webhook
+Route::post('/stripe/webhook', [BillingController::class, 'handleWebhook'])
+    ->name('stripe.webhook');
 
 // Home route
 Route::get('/', [HomeController::class, 'index'])
@@ -32,13 +41,12 @@ Route::get('/', [HomeController::class, 'index'])
         Route::get('/billing/cancel/{client}', [BillingController::class, 'cancelPayment'])
             ->name('billing.cancel');
     });
-    
-// Stripe Webhook
-Route::post('/stripe/webhook', [BillingController::class, 'handleWebhook'])
-    ->name('stripe.webhook');
 
 // Protected routes - require authentication
 Route::middleware(['auth'])->group(function () {
+    // Client Dashboard
+    Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
+
     // Shops
     Route::get('/shops', [ShopController::class, 'index'])->name('shops.index');
     Route::post('/shops', [ShopController::class, 'store'])->name('shops.store');

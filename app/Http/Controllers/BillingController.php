@@ -12,14 +12,21 @@ use Illuminate\Support\Facades\Auth;
 class BillingController extends Controller
 {
     public function createCheckout(
-        Request $request, 
+        Request $request,
         StripeService $stripeService
     ) {
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id'
         ]);
-        
+
         $client = Auth::user()->client;
+
+        if (!$client) {
+            return response()->json([
+                'message' => 'Client profile not found. Please complete your profile first.'
+            ], 403);
+        }
+
         $plan = Plan::findOrFail($validated['plan_id']);
 
         try {

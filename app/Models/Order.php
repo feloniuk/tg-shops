@@ -11,12 +11,13 @@ class Order extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'shop_id', 
-        'customer_name', 
-        'customer_phone', 
-        'customer_email', 
-        'total_amount', 
-        'status', 
+        'shop_id',
+        'telegram_user_id',
+        'customer_name',
+        'customer_phone',
+        'customer_email',
+        'total_amount',
+        'status',
         'order_details',
         'customer_comment'
     ];
@@ -40,5 +41,14 @@ class Order extends Model
     public function isCompleted(): bool
     {
         return $this->status === 'completed';
+    }
+
+    // Получить заказы пользователя Telegram
+    public static function getByTelegramUser(int $shopId, int $telegramUserId)
+    {
+        return self::where('shop_id', $shopId)
+            ->where('telegram_user_id', $telegramUserId)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }

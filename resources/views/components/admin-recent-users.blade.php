@@ -5,10 +5,10 @@
         Recent Users
     </h2>
     <div class="divide-y divide-gray-200 dark:divide-gray-700">
-        @foreach($users as $user)
+        @forelse($users ?? [] as $user)
             <div class="flex items-center py-3">
-                <img 
-                    src="{{ $user->avatar ?? 'default-avatar.png' }}" 
+                <img
+                    src="{{ $user->avatar ?? 'default-avatar.png' }}"
                     alt="{{ $user->name }}"
                     class="w-10 h-10 rounded-full mr-4"
                 />
@@ -21,6 +21,8 @@
                     </p>
                 </div>
             </div>
-        @endforeach
+        @empty
+            <p class="text-sm text-gray-500 dark:text-gray-400 py-3">No recent users</p>
+        @endforelse
     </div>
 </div>

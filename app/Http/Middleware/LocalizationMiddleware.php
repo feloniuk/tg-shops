@@ -10,16 +10,20 @@ class LocalizationMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Определяем локаль из URL или используем дефолтную
-        $locale = $request->segment(1);
-        
+        // Поддерживаемые локали
         $supportedLocales = ['en', 'uk'];
-        
-        if (in_array($locale, $supportedLocales)) {
-            app()->setLocale($locale);
-        } else {
-            app()->setLocale(config('app.locale', 'en'));
+
+        // Проверяем сессию - приоритет 1
+        if (session()->has('locale')) {
+            $locale = session('locale');
+            if (in_array($locale, $supportedLocales)) {
+                app()->setLocale($locale);
+                return $next($request);
+            }
         }
+
+        // Устанавливаем украинский по умолчанию
+        app()->setLocale(config('app.locale', 'uk'));
 
         return $next($request);
     }

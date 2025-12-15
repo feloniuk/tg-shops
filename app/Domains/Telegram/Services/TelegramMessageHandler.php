@@ -7,7 +7,9 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\TelegramSession;
 use App\Models\ShopCategory;
+use App\Mail\OrderCreatedMailable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class TelegramMessageHandler
 {
@@ -106,6 +108,16 @@ class TelegramMessageHandler
             case 'skip_comment':
                 $this->createOrder($shop, $session, $chatId);
                 break;
+            case 'my_orders':
+                $this->showMyOrders($shop, $session, $chatId);
+                break;
+            case 'main_menu':
+                $this->sendMainMenu($shop, $chatId);
+                break;
+            case 'order_details':
+                $orderId = (int)($parts[1] ?? 0);
+                $this->showOrderDetails($shop, $chatId, $orderId);
+                break;
         }
 
         // Answer callback query
@@ -125,10 +137,12 @@ class TelegramMessageHandler
         $keyboard = [
             'inline_keyboard' => [
                 [
-                    ['text' => '📦 Каталог товарів', 'callback_data' => 'catalog']
+                    ['text' => '📦 Каталог товарів', 'callback_data' => 'catalog'],
+                    ['text' => '🛒 Кошик', 'callback_data' => 'view_cart']
                 ],
                 [
-                    ['text' => '🛒 Кошик', 'callback_data' => 'view_cart']
+                    ['text' => '📋 Мої замовлення', 'callback_data' => 'my_orders'],
+                    ['text' => '🏠 Головна', 'callback_data' => 'main_menu']
                 ]
             ]
         ];
@@ -228,17 +242,32 @@ class TelegramMessageHandler
 
         $description = "*{$product->name}*\n\n";
         $description .= $product->description ? "{$product->description}\n\n" : '';
-        $description .= "💰 Ціна: *{$product->price} грн*";
+        $description .= "💰 Ціна: *{$product->price} грн*\n\n";
+
+        // Информация о наличии
+        if ($product->track_stock) {
+            if ($product->stock_quantity > 0) {
+                $description .= "📦 В наявності: {$product->stock_quantity} шт\n";
+            } elseif ($product->allow_backorder) {
+                $description .= "📦 Товар під замовлення\n";
+            } else {
+                $description .= "❌ Немає в наявності\n";
+            }
+        }
 
         $keyboard = [
-            'inline_keyboard' => [
-                [
-                    ['text' => '➕ Додати в кошик', 'callback_data' => "add_to_cart:{$product->id}"]
-                ],
-                [
-                    ['text' => '◀️ Назад', 'callback_data' => $product->category_id ? "category:{$product->category_id}" : 'catalog']
-                ]
-            ]
+            'inline_keyboard' => []
+        ];
+
+        // Кнопка добавления в корзину только если товар доступен
+        if ($product->isInStock(1)) {
+            $keyboard['inline_keyboard'][] = [
+                ['text' => '➕ Додати в кошик', 'callback_data' => "add_to_cart:{$product->id}"]
+            ];
+        }
+
+        $keyboard['inline_keyboard'][] = [
+            ['text' => '◀️ Назад', 'callback_data' => $product->category_id ? "category:{$product->category_id}" : 'catalog']
         ];
 
         $this->sendMessage($shop, $chatId, $description, $keyboard, 'Markdown');
@@ -250,6 +279,17 @@ class TelegramMessageHandler
 
         if (!$product || $product->shop_id !== $shop->id) {
             $this->sendMessage($shop, $chatId, 'Товар не знайдено');
+            return;
+        }
+
+        // Проверка наличия товара
+        $cart = $session->getCart();
+        $currentQuantity = $cart[$productId]['quantity'] ?? 0;
+        $newQuantity = $currentQuantity + 1;
+
+        if (!$product->isInStock($newQuantity)) {
+            $this->sendMessage($shop, $chatId, "❌ На жаль, товар '{$product->name}' немає в достатній кількості");
+            $this->sendMainMenu($shop, $chatId);
             return;
         }
 
@@ -350,19 +390,60 @@ class TelegramMessageHandler
     private function createOrder(Shop $shop, TelegramSession $session, int $chatId): void
     {
         $cart = $session->getCart();
-        $orderDetails = [];
 
+        if (empty($cart)) {
+            $this->sendMessage($shop, $chatId, '❌ Ваш кошик порожній');
+            $this->sendMainMenu($shop, $chatId);
+            return;
+        }
+
+        $orderDetails = [];
+        $outOfStockProducts = [];
+
+        // Проверяем наличие всех товаров и собираем детали заказа
         foreach ($cart as $productId => $item) {
             $product = Product::find($productId);
-            if ($product) {
-                $orderDetails[] = [
-                    'product_id' => $productId,
-                    'name' => $product->name,
-                    'price' => $product->price,
-                    'quantity' => $item['quantity'],
-                    'total' => $product->price * $item['quantity']
-                ];
+
+            if (!$product) {
+                $outOfStockProducts[] = "Товар #{$productId} (не знайдено)";
+                continue;
             }
+
+            // Проверяем наличие
+            if (!$product->isInStock($item['quantity'])) {
+                $outOfStockProducts[] = $product->name;
+                continue;
+            }
+
+            $orderDetails[] = [
+                'product_id' => $productId,
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $item['quantity'],
+                'total' => $product->price * $item['quantity']
+            ];
+        }
+
+        // Если есть товары не в наличии, уведомляем пользователя
+        if (!empty($outOfStockProducts)) {
+            $message = "❌ На жаль, наступні товари закінчилися:\n\n";
+            foreach ($outOfStockProducts as $productName) {
+                $message .= "• {$productName}\n";
+            }
+            $message .= "\nБудь ласка, видаліть їх з кошика та спробуйте знову.";
+
+            $this->sendMessage($shop, $chatId, $message);
+            $this->showCart($shop, $session, $chatId);
+            return;
+        }
+
+        // Если все товары удалены из-за отсутствия в наличии
+        if (empty($orderDetails)) {
+            $this->sendMessage($shop, $chatId, '❌ Товари з вашого кошика закінчилися. Кошик очищено.');
+            $session->clearCart();
+            $session->save();
+            $this->sendMainMenu($shop, $chatId);
+            return;
         }
 
         $contact = $session->data['contact'] ?? 'Не вказано';
@@ -370,6 +451,7 @@ class TelegramMessageHandler
 
         $order = Order::create([
             'shop_id' => $shop->id,
+            'telegram_user_id' => $session->telegram_user_id,
             'customer_name' => $contact,
             'customer_phone' => $contact,
             'total_amount' => $session->getCartTotal(),
@@ -377,6 +459,32 @@ class TelegramMessageHandler
             'order_details' => $orderDetails,
             'customer_comment' => $comment
         ]);
+
+        // Отправка email уведомления владельцу магазина
+        try {
+            if ($shop->client && $shop->client->user && $shop->client->user->email) {
+                $shopOwnerEmail = $shop->client->user->email;
+                Mail::to($shopOwnerEmail)->send(new OrderCreatedMailable($order));
+            } else {
+                Log::warning('Cannot send order created email - shop owner email not found', [
+                    'order_id' => $order->id,
+                    'shop_id' => $shop->id
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send order created email', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Декремент остатков товаров
+        foreach ($cart as $productId => $item) {
+            $product = Product::find($productId);
+            if ($product) {
+                $product->decrementStock($item['quantity']);
+            }
+        }
 
         $session->clearCart();
         $session->state = 'browsing';
@@ -467,5 +575,101 @@ class TelegramMessageHandler
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    private function showMyOrders(Shop $shop, TelegramSession $session, int $chatId): void
+    {
+        $orders = Order::getByTelegramUser($shop->id, $session->telegram_user_id);
+
+        if ($orders->isEmpty()) {
+            $this->sendMessage($shop, $chatId, "📋 У вас поки немає замовлень.\n\nОберіть товари з каталогу!");
+            $this->sendMainMenu($shop, $chatId);
+            return;
+        }
+
+        $message = "📋 *Ваші замовлення:*\n\n";
+
+        $keyboard = ['inline_keyboard' => []];
+        $statusLabels = [
+            'pending' => '⏳ Очікує обробки',
+            'processing' => '⚙️ В обробці',
+            'completed' => '✅ Виконано',
+            'cancelled' => '❌ Скасовано',
+            'refunded' => '↩️ Повернення'
+        ];
+
+        foreach ($orders->take(10) as $order) {
+            $statusEmoji = match($order->status) {
+                'pending' => '⏳',
+                'processing' => '⚙️',
+                'completed' => '✅',
+                'cancelled' => '❌',
+                'refunded' => '↩️',
+                default => '📦'
+            };
+
+            $message .= "{$statusEmoji} *Замовлення #{$order->id}*\n";
+            $message .= "Сума: {$order->total_amount} грн\n";
+            $message .= "Статус: {$statusLabels[$order->status]}\n";
+            $message .= "Дата: {$order->created_at->format('d.m.Y H:i')}\n\n";
+
+            $keyboard['inline_keyboard'][] = [
+                ['text' => "📦 Замовлення #{$order->id}", 'callback_data' => "order_details:{$order->id}"]
+            ];
+        }
+
+        $keyboard['inline_keyboard'][] = [
+            ['text' => '🏠 Головна', 'callback_data' => 'main_menu']
+        ];
+
+        $this->sendMessage($shop, $chatId, $message, $keyboard, 'Markdown');
+    }
+
+    private function showOrderDetails(Shop $shop, int $chatId, int $orderId): void
+    {
+        $order = Order::find($orderId);
+
+        if (!$order || $order->shop_id !== $shop->id) {
+            $this->sendMessage($shop, $chatId, '❌ Замовлення не знайдено');
+            $this->sendMainMenu($shop, $chatId);
+            return;
+        }
+
+        $statusLabels = [
+            'pending' => '⏳ Очікує обробки',
+            'processing' => '⚙️ В обробці',
+            'completed' => '✅ Виконано',
+            'cancelled' => '❌ Скасовано',
+            'refunded' => '↩️ Повернення'
+        ];
+
+        $message = "📦 *Замовлення #{$order->id}*\n\n";
+        $message .= "📅 Дата: {$order->created_at->format('d.m.Y H:i')}\n";
+        $message .= "📊 Статус: {$statusLabels[$order->status]}\n\n";
+
+        $message .= "*Товари:*\n";
+        foreach ($order->order_details as $item) {
+            $message .= "• {$item['name']}\n";
+            $message .= "  {$item['quantity']} шт × {$item['price']} грн = " . ($item['quantity'] * $item['price']) . " грн\n";
+        }
+
+        $message .= "\n*Загальна сума: {$order->total_amount} грн*\n\n";
+
+        if ($order->customer_comment) {
+            $message .= "💬 Ваш коментар: {$order->customer_comment}\n\n";
+        }
+
+        $keyboard = [
+            'inline_keyboard' => [
+                [
+                    ['text' => '📋 Мої замовлення', 'callback_data' => 'my_orders']
+                ],
+                [
+                    ['text' => '🏠 Головна', 'callback_data' => 'main_menu']
+                ]
+            ]
+        ];
+
+        $this->sendMessage($shop, $chatId, $message, $keyboard, 'Markdown');
     }
 }

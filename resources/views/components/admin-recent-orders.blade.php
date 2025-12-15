@@ -5,7 +5,7 @@
         Recent Orders
     </h2>
     <div class="divide-y divide-gray-200 dark:divide-gray-700">
-        @forelse($orders as $order)
+        @forelse($orders ?? [] as $order)
             <div class="flex items-center justify-between py-3">
                 <div>
                     <p class="text-sm font-medium text-gray-900 dark:text-white">

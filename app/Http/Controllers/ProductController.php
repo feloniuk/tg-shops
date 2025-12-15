@@ -14,10 +14,15 @@ class ProductController extends Controller
         private ProductRepository $productRepository
     ) {}
 
-    public function index(Shop $shop)
+    public function index(Request $request, Shop $shop)
     {
         $products = $this->productRepository->findByShopId($shop->id);
-        return response()->json($products);
+
+        if ($request->wantsJson()) {
+            return response()->json($products);
+        }
+
+        return view('products.index', compact('shop', 'products'));
     }
 
     public function store(Request $request, Shop $shop)
@@ -28,21 +33,30 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'category_id' => 'nullable|exists:shop_categories,id',
             'characteristics' => 'nullable|array',
-            'image' => 'nullable|string'
+            'image' => 'nullable|string',
+            'stock_quantity' => 'nullable|integer|min:0'
         ]);
 
         try {
             $product = $this->productCreationService->createProduct($shop, $validated);
 
-            return response()->json([
-                'message' => 'Product created successfully',
-                'product' => $product
-            ], 201);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Product created successfully',
+                    'product' => $product
+                ], 201);
+            }
+
+            return redirect()->route('products.index', $shop)->with('success', 'Product created successfully!');
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Product creation failed',
-                'error' => $e->getMessage()
-            ], 400);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Product creation failed',
+                    'error' => $e->getMessage()
+                ], 400);
+            }
+
+            return redirect()->back()->with('error', 'Failed to create product: ' . $e->getMessage());
         }
     }
 }

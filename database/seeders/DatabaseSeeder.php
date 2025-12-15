@@ -15,15 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Run seeders in correct order
         $this->call([
             PlanSeeder::class,
-            // Другие seeders в будущем
+            RoleAndPermissionSeeder::class,
+            // Uncomment to seed demo data:
+            // DemoDataSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        echo "\n✓ All seeders completed successfully!\n";
+        echo "To add demo data, uncomment DemoDataSeeder in DatabaseSeeder.php\n";
     }
 }
