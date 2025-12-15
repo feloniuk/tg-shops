@@ -18,6 +18,7 @@ class LocalizationMiddleware
             $locale = session('locale');
             if (in_array($locale, $supportedLocales)) {
                 app()->setLocale($locale);
+
                 return $next($request);
             }
         }

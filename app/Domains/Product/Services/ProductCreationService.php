@@ -3,8 +3,8 @@
 namespace App\Domains\Product\Services;
 
 use App\Domains\Product\Repositories\ProductRepository;
-use App\Models\Shop;
 use App\Models\Product;
+use App\Models\Shop;
 use Illuminate\Validation\ValidationException;
 
 class ProductCreationService
@@ -28,8 +28,8 @@ class ProductCreationService
         if ($currentProductCount >= $maxProducts) {
             throw ValidationException::withMessages([
                 'products' => __('product.limits.max_products_reached', [
-                    'limit' => $maxProducts
-                ])
+                    'limit' => $maxProducts,
+                ]),
             ]);
         }
 
@@ -49,10 +49,10 @@ class ProductCreationService
     private function validateProductName(Shop $shop, string $name): void
     {
         $existingProduct = $shop->products()->where('name', $name)->exists();
-        
+
         if ($existingProduct) {
             throw ValidationException::withMessages([
-                'name' => __('product.validation.unique_name')
+                'name' => __('product.validation.unique_name'),
             ]);
         }
     }

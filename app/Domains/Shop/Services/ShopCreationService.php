@@ -3,12 +3,10 @@
 namespace App\Domains\Shop\Services;
 
 use App\Domains\Shop\Repositories\ShopRepository;
-use App\Domains\Shop\Services\ShopLimitService;
 use App\Domains\Telegram\Services\TelegramBotService;
 use App\Models\Client;
 use App\Models\Shop;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class ShopCreationService
 {
@@ -32,7 +30,7 @@ class ShopCreationService
             $shop = $this->shopRepository->create($data);
 
             // Если передан токен Telegram Bot, регистрируем
-            if (!empty($data['telegram_bot_token'])) {
+            if (! empty($data['telegram_bot_token'])) {
                 $this->registerTelegramBot($shop, $data['telegram_bot_token']);
             }
 

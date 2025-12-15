@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
@@ -19,13 +19,13 @@ class Order extends Model
         'total_amount',
         'status',
         'order_details',
-        'customer_comment'
+        'customer_comment',
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
         'order_details' => 'array',
-        'status' => 'string'
+        'status' => 'string',
     ];
 
     public function shop()

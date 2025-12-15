@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Telegram;
 
+use App\Domains\Telegram\Services\TelegramMessageHandler;
 use App\Http\Controllers\Controller;
 use App\Models\Shop;
-use App\Domains\Telegram\Services\TelegramMessageHandler;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class TelegramWebhookController extends Controller
@@ -23,9 +23,9 @@ class TelegramWebhookController extends Controller
         try {
             $shop = Shop::where('telegram_bot_token', $botToken)->first();
 
-            if (!$shop || !$shop->isActive()) {
+            if (! $shop || ! $shop->isActive()) {
                 Log::warning('Telegram webhook received for inactive or non-existent shop', [
-                    'bot_token' => substr($botToken, 0, 10) . '...'
+                    'bot_token' => substr($botToken, 0, 10).'...',
                 ]);
 
                 return response()->json(['ok' => false]);
@@ -35,7 +35,7 @@ class TelegramWebhookController extends Controller
 
             Log::info('Telegram webhook received', [
                 'shop_id' => $shop->id,
-                'update_id' => $update['update_id'] ?? null
+                'update_id' => $update['update_id'] ?? null,
             ]);
 
             $this->messageHandler->handleMessage($shop, $update);
@@ -44,7 +44,7 @@ class TelegramWebhookController extends Controller
         } catch (\Exception $e) {
             Log::error('Telegram webhook error', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json(['ok' => false], 500);

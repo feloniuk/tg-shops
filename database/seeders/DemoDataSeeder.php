@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Client;
+use App\Models\Order;
 use App\Models\Plan;
+use App\Models\Product;
 use App\Models\Shop;
 use App\Models\ShopCategory;
-use App\Models\Product;
-use App\Models\Order;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -21,7 +21,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
-            'email_verified_at' => now()
+            'email_verified_at' => now(),
         ]);
         $adminUser->assignRole('admin');
 
@@ -32,7 +32,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Demo Client',
             'email' => 'client@example.com',
             'password' => Hash::make('password'),
-            'email_verified_at' => now()
+            'email_verified_at' => now(),
         ]);
         $clientUser->assignRole('client');
 
@@ -47,7 +47,7 @@ class DemoDataSeeder extends Seeder
             'company_name' => 'Demo Shop Company',
             'phone' => '+380501234567',
             'plan_id' => $proPlan->id,
-            'plan_expires_at' => now()->addYear()
+            'plan_expires_at' => now()->addYear(),
         ]);
 
         echo "✓ Client profile created with Pro plan\n";
@@ -61,9 +61,9 @@ class DemoDataSeeder extends Seeder
             'footer_message' => 'Дякуємо за покупку!',
             'design_settings' => [
                 'theme_color' => '#4F46E5',
-                'button_style' => 'rounded'
+                'button_style' => 'rounded',
             ],
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         echo "✓ Shop created: {$shop->name}\n";
@@ -73,21 +73,21 @@ class DemoDataSeeder extends Seeder
             ShopCategory::create([
                 'shop_id' => $shop->id,
                 'name' => 'Смартфони',
-                'description' => 'Найновіші моделі смартфонів'
+                'description' => 'Найновіші моделі смартфонів',
             ]),
             ShopCategory::create([
                 'shop_id' => $shop->id,
                 'name' => 'Ноутбуки',
-                'description' => 'Потужні ноутбуки для роботи та ігор'
+                'description' => 'Потужні ноутбуки для роботи та ігор',
             ]),
             ShopCategory::create([
                 'shop_id' => $shop->id,
                 'name' => 'Аксесуари',
-                'description' => 'Навушники, чохли, зарядки'
-            ])
+                'description' => 'Навушники, чохли, зарядки',
+            ]),
         ];
 
-        echo "✓ Created " . count($categories) . " categories\n";
+        echo '✓ Created '.count($categories)." categories\n";
 
         // 7. Create products
         $products = [
@@ -102,8 +102,8 @@ class DemoDataSeeder extends Seeder
                     'Екран' => '6.1" Super Retina XDR',
                     'Процесор' => 'A17 Pro',
                     'Пам\'ять' => '256GB',
-                    'Камера' => '48MP основна'
-                ]
+                    'Камера' => '48MP основна',
+                ],
             ]),
             Product::create([
                 'shop_id' => $shop->id,
@@ -115,8 +115,8 @@ class DemoDataSeeder extends Seeder
                     'Екран' => '6.2" Dynamic AMOLED',
                     'Процесор' => 'Snapdragon 8 Gen 3',
                     'Пам\'ять' => '256GB',
-                    'Камера' => '50MP основна'
-                ]
+                    'Камера' => '50MP основна',
+                ],
             ]),
             // Laptops
             Product::create([
@@ -129,8 +129,8 @@ class DemoDataSeeder extends Seeder
                     'Процесор' => 'Apple M3',
                     'Оперативна пам\'ять' => '16GB',
                     'Накопичувач' => '512GB SSD',
-                    'Екран' => '13.6" Retina'
-                ]
+                    'Екран' => '13.6" Retina',
+                ],
             ]),
             Product::create([
                 'shop_id' => $shop->id,
@@ -142,8 +142,8 @@ class DemoDataSeeder extends Seeder
                     'Процесор' => 'Intel Core i7-13700H',
                     'Оперативна пам\'ять' => '32GB',
                     'Накопичувач' => '1TB SSD',
-                    'Екран' => '14" 2.8K OLED'
-                ]
+                    'Екран' => '14" 2.8K OLED',
+                ],
             ]),
             // Accessories
             Product::create([
@@ -156,8 +156,8 @@ class DemoDataSeeder extends Seeder
                     'Тип' => 'TWS навушники',
                     'Шумозаглушення' => 'Активне ANC',
                     'Час роботи' => 'До 6 годин',
-                    'Зарядка' => 'USB-C'
-                ]
+                    'Зарядка' => 'USB-C',
+                ],
             ]),
             Product::create([
                 'shop_id' => $shop->id,
@@ -169,12 +169,12 @@ class DemoDataSeeder extends Seeder
                     'Ємність' => '20000mAh',
                     'Порти' => '2x USB-A, 1x USB-C',
                     'Швидка зарядка' => 'Power Delivery 20W',
-                    'Вага' => '365г'
-                ]
-            ])
+                    'Вага' => '365г',
+                ],
+            ]),
         ];
 
-        echo "✓ Created " . count($products) . " products\n";
+        echo '✓ Created '.count($products)." products\n";
 
         // 8. Create demo orders
         $orders = [
@@ -191,17 +191,17 @@ class DemoDataSeeder extends Seeder
                         'name' => $products[0]->name,
                         'price' => $products[0]->price,
                         'quantity' => 1,
-                        'total' => $products[0]->price
+                        'total' => $products[0]->price,
                     ],
                     [
                         'product_id' => $products[4]->id,
                         'name' => $products[4]->name,
                         'price' => $products[4]->price,
                         'quantity' => 1,
-                        'total' => $products[4]->price
-                    ]
+                        'total' => $products[4]->price,
+                    ],
                 ],
-                'customer_comment' => 'Прошу передзвонити перед доставкою'
+                'customer_comment' => 'Прошу передзвонити перед доставкою',
             ]),
             Order::create([
                 'shop_id' => $shop->id,
@@ -215,16 +215,16 @@ class DemoDataSeeder extends Seeder
                         'name' => $products[3]->name,
                         'price' => $products[3]->price,
                         'quantity' => 1,
-                        'total' => $products[3]->price
+                        'total' => $products[3]->price,
                     ],
                     [
                         'product_id' => $products[5]->id,
                         'name' => $products[5]->name,
                         'price' => $products[5]->price,
                         'quantity' => 1,
-                        'total' => $products[5]->price
-                    ]
-                ]
+                        'total' => $products[5]->price,
+                    ],
+                ],
             ]),
             Order::create([
                 'shop_id' => $shop->id,
@@ -238,13 +238,13 @@ class DemoDataSeeder extends Seeder
                         'name' => $products[1]->name,
                         'price' => $products[1]->price,
                         'quantity' => 1,
-                        'total' => $products[1]->price
-                    ]
-                ]
-            ])
+                        'total' => $products[1]->price,
+                    ],
+                ],
+            ]),
         ];
 
-        echo "✓ Created " . count($orders) . " demo orders\n";
+        echo '✓ Created '.count($orders)." demo orders\n";
 
         echo "\n";
         echo "========================================\n";

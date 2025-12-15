@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -17,9 +16,9 @@ class DashboardController extends Controller
         $client = $user->client;
 
         // If user doesn't have a client record, create one with default plan
-        if (!$client) {
+        if (! $client) {
             $defaultPlan = \App\Models\Plan::where('name', 'Free')->first();
-            if (!$defaultPlan) {
+            if (! $defaultPlan) {
                 abort(500, 'Default plan not found. Please run database seeders.');
             }
 
@@ -82,12 +81,12 @@ class DashboardController extends Controller
             ->where('status', 'completed')
             ->get()
             ->flatMap(function ($order) {
-                return collect($order->order_details)->map(function ($item) use ($order) {
+                return collect($order->order_details)->map(function ($item) {
                     return [
                         'product_id' => $item['product_id'] ?? null,
                         'name' => $item['name'],
                         'quantity' => $item['quantity'],
-                        'total' => $item['total']
+                        'total' => $item['total'],
                     ];
                 });
             })
@@ -96,7 +95,7 @@ class DashboardController extends Controller
                 return [
                     'name' => $items->first()['name'],
                     'quantity' => $items->sum('quantity'),
-                    'revenue' => $items->sum('total')
+                    'revenue' => $items->sum('total'),
                 ];
             })
             ->sortByDesc('quantity')

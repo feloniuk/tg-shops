@@ -18,16 +18,16 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->enum('status', [
-                'open', 
-                'in_progress', 
-                'resolved', 
-                'closed'
+                'open',
+                'in_progress',
+                'resolved',
+                'closed',
             ])->default('open');
             $table->enum('priority', [
-                'low', 
-                'medium', 
-                'high', 
-                'critical'
+                'low',
+                'medium',
+                'high',
+                'critical',
             ])->default('low');
             $table->timestamp('last_response_at')->nullable();
             $table->timestamps();

@@ -11,7 +11,7 @@ class SubscriptionService
     public function changePlan(Client $client, Plan $newPlan): bool
     {
         // Проверка возможности смены тарифа
-        if (!$this->canChangePlan($client, $newPlan)) {
+        if (! $this->canChangePlan($client, $newPlan)) {
             return false;
         }
 
@@ -19,21 +19,21 @@ class SubscriptionService
         try {
             $client->update([
                 'plan_id' => $newPlan->id,
-                'plan_expires_at' => now()->addMonth()
+                'plan_expires_at' => now()->addMonth(),
             ]);
 
             // Логирование изменения тарифа
             Log::info('Plan changed', [
                 'client_id' => $client->id,
                 'old_plan' => $client->plan->name,
-                'new_plan' => $newPlan->name
+                'new_plan' => $newPlan->name,
             ]);
 
             return true;
         } catch (\Exception $e) {
             Log::error('Plan change failed', [
                 'client_id' => $client->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return false;

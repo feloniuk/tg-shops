@@ -2,10 +2,10 @@
 
 namespace App\Domains\Support\Services;
 
-use App\Models\Ticket;
-use App\Models\User;
 use App\Models\Client;
+use App\Models\Ticket;
 use App\Models\TicketMessage;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -17,7 +17,7 @@ class TicketService
         $openTicketsCount = $client->tickets()->where('status', 'open')->count();
         if ($openTicketsCount >= 5) {
             throw ValidationException::withMessages([
-                'tickets' => 'Превышено максимальное количество открытых тикетов'
+                'tickets' => 'Превышено максимальное количество открытых тикетов',
             ]);
         }
 
@@ -27,14 +27,14 @@ class TicketService
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'status' => 'open',
-                'priority' => $data['priority'] ?? 'low'
+                'priority' => $data['priority'] ?? 'low',
             ]);
 
             // Создание первого сообщения
             $ticket->messages()->create([
                 'sender_id' => $client->user_id,
                 'message' => $data['description'],
-                'attachments' => $data['attachments'] ?? null
+                'attachments' => $data['attachments'] ?? null,
             ]);
 
             return $ticket;
@@ -43,15 +43,15 @@ class TicketService
 
     public function assignManager(Ticket $ticket, User $manager): bool
     {
-        if (!$manager->hasRole('manager')) {
+        if (! $manager->hasRole('manager')) {
             throw ValidationException::withMessages([
-                'manager' => 'Указанный пользователь не является менеджером поддержки'
+                'manager' => 'Указанный пользователь не является менеджером поддержки',
             ]);
         }
 
         return $ticket->update([
             'manager_id' => $manager->id,
-            'status' => 'in_progress'
+            'status' => 'in_progress',
         ]);
     }
 
@@ -60,7 +60,7 @@ class TicketService
         // Проверка прав на добавление сообщения
         if ($ticket->isClosed()) {
             throw ValidationException::withMessages([
-                'ticket' => 'Нельзя добавить сообщение в закрытый тикет'
+                'ticket' => 'Нельзя добавить сообщение в закрытый тикет',
             ]);
         }
 
@@ -68,14 +68,14 @@ class TicketService
             // Обновляем статус тикета
             $ticket->update([
                 'status' => $sender->hasRole('manager') ? 'in_progress' : 'open',
-                'last_response_at' => now()
+                'last_response_at' => now(),
             ]);
 
             // Создаем сообщение
             return $ticket->messages()->create([
                 'sender_id' => $sender->id,
                 'message' => $message,
-                'attachments' => $attachments
+                'attachments' => $attachments,
             ]);
         });
     }
@@ -83,7 +83,7 @@ class TicketService
     public function closeTicket(Ticket $ticket, User $closedBy): bool
     {
         return $ticket->update([
-            'status' => 'closed'
+            'status' => 'closed',
         ]);
     }
 }

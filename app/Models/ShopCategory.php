@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ShopCategory extends Model
@@ -11,14 +11,14 @@ class ShopCategory extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'shop_id', 
-        'name', 
-        'description', 
-        'is_active'
+        'shop_id',
+        'name',
+        'description',
+        'is_active',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     public function shop()

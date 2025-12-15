@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Domains\Product\Services\ProductCreationService;
 use App\Domains\Product\Repositories\ProductRepository;
+use App\Domains\Product\Services\ProductCreationService;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 
@@ -34,7 +34,7 @@ class ProductController extends Controller
             'category_id' => 'nullable|exists:shop_categories,id',
             'characteristics' => 'nullable|array',
             'image' => 'nullable|string',
-            'stock_quantity' => 'nullable|integer|min:0'
+            'stock_quantity' => 'nullable|integer|min:0',
         ]);
 
         try {
@@ -43,7 +43,7 @@ class ProductController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'message' => 'Product created successfully',
-                    'product' => $product
+                    'product' => $product,
                 ], 201);
             }
 
@@ -52,11 +52,11 @@ class ProductController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'message' => 'Product creation failed',
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ], 400);
             }
 
-            return redirect()->back()->with('error', 'Failed to create product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create product: '.$e->getMessage());
         }
     }
 }

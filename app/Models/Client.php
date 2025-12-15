@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
@@ -11,33 +11,36 @@ class Client extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 
-        'company_name', 
-        'phone', 
-        'plan_id', 
-        'plan_expires_at'
+        'user_id',
+        'company_name',
+        'phone',
+        'plan_id',
+        'plan_expires_at',
     ];
 
-    protected $casts = [
-        'plan_expires_at' => 'datetime'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'plan_expires_at' => 'datetime',
+        ];
+    }
 
-    public function user()
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function plan()
+    public function plan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Plan::class);
     }
 
-    public function shops()
+    public function shops(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Shop::class);
     }
 
-    public function tickets()
+    public function tickets(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Ticket::class);
     }

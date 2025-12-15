@@ -15,9 +15,9 @@ class UserManagementController extends Controller
         // Фильтрация
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%");
+                    ->orWhere('email', 'LIKE', "%{$search}%");
             });
         }
 
@@ -30,22 +30,23 @@ class UserManagementController extends Controller
         $users = $query->paginate(20)->withQueryString();
 
         return view('admin.users.index', [
-            'users' => $users
+            'users' => $users,
         ]);
     }
 
     public function show(User $user)
     {
         $user->load(['client', 'client.shops', 'client.plan']);
+
         return view('admin.users.show', [
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
     public function updateStatus(Request $request, User $user)
     {
         $validated = $request->validate([
-            'status' => 'required|in:active,blocked'
+            'status' => 'required|in:active,blocked',
         ]);
 
         $user->update($validated);

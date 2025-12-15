@@ -12,12 +12,12 @@ class TelegramSession extends Model
         'telegram_user_id',
         'state',
         'data',
-        'last_activity'
+        'last_activity',
     ];
 
     protected $casts = [
         'data' => 'array',
-        'last_activity' => 'datetime'
+        'last_activity' => 'datetime',
     ];
 
     public function shop(): BelongsTo

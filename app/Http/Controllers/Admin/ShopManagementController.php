@@ -24,22 +24,23 @@ class ShopManagementController extends Controller
         $shops = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         return view('admin.shops.index', [
-            'shops' => $shops
+            'shops' => $shops,
         ]);
     }
 
     public function show(Shop $shop)
     {
         $shop->load(['client', 'products', 'orders']);
+
         return view('admin.shops.show', [
-            'shop' => $shop
+            'shop' => $shop,
         ]);
     }
 
     public function updateStatus(Request $request, Shop $shop)
     {
         $validated = $request->validate([
-            'status' => 'required|in:active,inactive,blocked'
+            'status' => 'required|in:active,inactive,blocked',
         ]);
 
         $shop->update($validated);

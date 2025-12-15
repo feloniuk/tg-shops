@@ -3,22 +3,14 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleAndPermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Очистка существующих ролей и разрешений
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-
-        // Очистка таблиц (удаление существующих данных)
-        \DB::table('model_has_permissions')->delete();
-        \DB::table('model_has_roles')->delete();
-        \DB::table('role_has_permissions')->delete();
-        Permission::query()->delete();
-        Role::query()->delete();
 
         // Permissions для клиентов
         $clientPermissions = [
@@ -29,7 +21,7 @@ class RoleAndPermissionSeeder extends Seeder
             'update product',
             'delete product',
             'view shop statistics',
-            'manage orders'
+            'manage orders',
         ];
 
         // Permissions для менеджеров
@@ -37,7 +29,7 @@ class RoleAndPermissionSeeder extends Seeder
             'view client shops',
             'manage client support',
             'view support tickets',
-            'respond to support tickets'
+            'respond to support tickets',
         ];
 
         // Permissions для администраторов
@@ -45,7 +37,7 @@ class RoleAndPermissionSeeder extends Seeder
             'manage plans',
             'manage users',
             'view global statistics',
-            'manage system settings'
+            'manage system settings',
         ];
 
         // Создание разрешений
@@ -56,26 +48,21 @@ class RoleAndPermissionSeeder extends Seeder
             ->toArray();
 
         foreach ($allPermissions as $permission) {
-            Permission::create(['name' => $permission, 'guard_name' => 'web']);
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web']
+            );
         }
 
-        // Очистка кеша после создания разрешений
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Создание ролей
-        $clientRole = Role::create(['name' => 'client']);
-        foreach ($clientPermissions as $permission) {
-            $clientRole->givePermissionTo($permission);
-        }
+        $clientRole = Role::firstOrCreate(['name' => 'client', 'guard_name' => 'web']);
+        $clientRole->syncPermissions($clientPermissions);
 
-        $managerRole = Role::create(['name' => 'manager']);
-        foreach ($managerPermissions as $permission) {
-            $managerRole->givePermissionTo($permission);
-        }
+        $managerRole = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
+        $managerRole->syncPermissions($managerPermissions);
 
-        $adminRole = Role::create(['name' => 'admin']);
-        foreach ($allPermissions as $permission) {
-            $adminRole->givePermissionTo($permission);
-        }
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole->syncPermissions($allPermissions);
     }
 }

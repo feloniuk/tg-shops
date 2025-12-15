@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Domains\Shop\Services\ShopCreationService;
 use App\Domains\Shop\Repositories\ShopRepository;
+use App\Domains\Shop\Services\ShopCreationService;
 use App\Models\Shop;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ShopController extends Controller
 {
@@ -24,10 +24,10 @@ class ShopController extends Controller
         $client = $user->client;
 
         // Auto-create client if doesn't exist
-        if (!$client) {
+        if (! $client) {
             $freePlan = \App\Models\Plan::whereIn('name', ['Free', 'No Plan'])->first();
 
-            if (!$freePlan) {
+            if (! $freePlan) {
                 return redirect()->route('home')->with('error', 'Please contact support to activate your account.');
             }
 
@@ -57,18 +57,19 @@ class ShopController extends Controller
             'name' => 'required|string|max:255',
             'telegram_bot_token' => 'nullable|string',
             'welcome_message' => 'nullable|string',
-            'footer_message' => 'nullable|string'
+            'footer_message' => 'nullable|string',
         ]);
 
         $user = Auth::user();
         $client = $user->client;
 
-        if (!$client) {
+        if (! $client) {
             if ($request->wantsJson()) {
                 return response()->json([
                     'message' => 'Client profile not found. Please complete your profile.',
                 ], 403);
             }
+
             return redirect()->back()->with('error', 'Client profile not found.');
         }
 
@@ -78,7 +79,7 @@ class ShopController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'message' => 'Shop created successfully',
-                    'shop' => $shop
+                    'shop' => $shop,
                 ], 201);
             }
 
@@ -87,11 +88,11 @@ class ShopController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'message' => 'Shop creation failed',
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ], 400);
             }
 
-            return redirect()->back()->with('error', 'Failed to create shop: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create shop: '.$e->getMessage());
         }
     }
 
@@ -101,7 +102,7 @@ class ShopController extends Controller
             'name' => 'sometimes|string|max:255',
             'telegram_bot_token' => 'nullable|string',
             'welcome_message' => 'nullable|string',
-            'footer_message' => 'nullable|string'
+            'footer_message' => 'nullable|string',
         ]);
 
         $shop = Shop::findOrFail($shopId);
@@ -111,7 +112,7 @@ class ShopController extends Controller
 
         return response()->json([
             'message' => 'Shop updated successfully',
-            'shop' => $shop
+            'shop' => $shop,
         ]);
     }
 }

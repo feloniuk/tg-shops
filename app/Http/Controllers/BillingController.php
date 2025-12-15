@@ -1,12 +1,11 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
-use App\Domains\Billing\Services\SubscriptionService;
-use Illuminate\Http\Request;
-use App\Models\Plan;
 use App\Domains\Billing\Services\StripeService;
 use App\Models\Client;
+use App\Models\Plan;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BillingController extends Controller
@@ -16,14 +15,14 @@ class BillingController extends Controller
         StripeService $stripeService
     ) {
         $validated = $request->validate([
-            'plan_id' => 'required|exists:plans,id'
+            'plan_id' => 'required|exists:plans,id',
         ]);
 
         $client = Auth::user()->client;
 
-        if (!$client) {
+        if (! $client) {
             return response()->json([
-                'message' => 'Client profile not found. Please complete your profile first.'
+                'message' => 'Client profile not found. Please complete your profile first.',
             ], 403);
         }
 
@@ -33,18 +32,18 @@ class BillingController extends Controller
             $session = $stripeService->createCheckoutSession($client, $plan);
 
             return response()->json([
-                'checkout_url' => $session->url
+                'checkout_url' => $session->url,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Не удалось создать сессию оплаты',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     public function handleWebhook(
-        Request $request, 
+        Request $request,
         StripeService $stripeService
     ) {
         $payload = $request->getContent();
@@ -52,6 +51,7 @@ class BillingController extends Controller
 
         try {
             $stripeService->handleWebhook($payload, $sigHeader);
+
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);

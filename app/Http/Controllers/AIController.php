@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Domains\AI\Services\AIGeneratorService;
-use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Plan;
+use Illuminate\Http\Request;
 
 class AIController extends Controller
 {
@@ -19,11 +19,11 @@ class AIController extends Controller
         $client = $user->client;
 
         // If client doesn't exist, create one with Free plan
-        if (!$client) {
+        if (! $client) {
             $defaultPlan = Plan::where('name', 'Free')->first();
-            if (!$defaultPlan) {
+            if (! $defaultPlan) {
                 return response()->json([
-                    'error' => 'Default plan not found. Please contact support.'
+                    'error' => 'Default plan not found. Please contact support.',
                 ], 500);
             }
 
@@ -37,7 +37,7 @@ class AIController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string',
-            'details' => 'nullable|array'
+            'details' => 'nullable|array',
         ]);
 
         try {
@@ -47,11 +47,11 @@ class AIController extends Controller
             );
 
             return response()->json([
-                'description' => $description
+                'description' => $description,
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to generate description: ' . $e->getMessage()
+                'error' => 'Failed to generate description: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -60,15 +60,15 @@ class AIController extends Controller
     {
         $client = auth()->user()->client;
 
-        if (!$client) {
+        if (! $client) {
             return response()->json([
-                'error' => 'Client profile not found. Please complete your profile first.'
+                'error' => 'Client profile not found. Please complete your profile first.',
             ], 403);
         }
 
         $validated = $request->validate([
             'name' => 'required|string',
-            'category' => 'nullable|string'
+            'category' => 'nullable|string',
         ]);
 
         try {
@@ -78,11 +78,11 @@ class AIController extends Controller
             );
 
             return response()->json([
-                'greeting' => $greeting
+                'greeting' => $greeting,
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to generate greeting: ' . $e->getMessage()
+                'error' => 'Failed to generate greeting: '.$e->getMessage(),
             ], 500);
         }
     }

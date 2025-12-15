@@ -4,11 +4,11 @@ namespace App\Domains\Billing\Services;
 
 use App\Models\Client;
 use App\Models\Plan;
-use Stripe\Stripe;
-use Stripe\Checkout\Session;
-use Stripe\Webhook;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
+use Stripe\Checkout\Session;
+use Stripe\Stripe;
+use Stripe\Webhook;
 
 class StripeService
 {
@@ -29,7 +29,7 @@ class StripeService
                         'currency' => config('services.stripe.default_currency'),
                         'unit_amount' => $plan->price * 100, // Cents
                         'product_data' => [
-                            'name' => $plan->name . ' Plan',
+                            'name' => $plan->name.' Plan',
                         ],
                     ],
                     'quantity' => 1,
@@ -40,8 +40,8 @@ class StripeService
                 'client_reference_id' => $client->id,
                 'metadata' => [
                     'client_id' => $client->id,
-                    'plan_id' => $plan->id
-                ]
+                    'plan_id' => $plan->id,
+                ],
             ]);
 
             return $session;
@@ -49,7 +49,7 @@ class StripeService
             Log::error('Stripe Checkout Session Error', [
                 'client_id' => $client->id,
                 'plan_id' => $plan->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -60,8 +60,8 @@ class StripeService
     {
         try {
             $event = Webhook::constructEvent(
-                $payload, 
-                $signatureHeader, 
+                $payload,
+                $signatureHeader,
                 config('services.stripe.webhook_secret')
             );
 
@@ -74,11 +74,11 @@ class StripeService
                     $invoice = $event->data->object;
                     $this->handleInvoicePaid($invoice);
                     break;
-                // Добавить другие обработчики webhook
+                    // Добавить другие обработчики webhook
             }
         } catch (\Exception $e) {
             Log::error('Stripe Webhook Error', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -96,12 +96,12 @@ class StripeService
         // Обновляем план и дату истечения
         $client->update([
             'plan_id' => $plan->id,
-            'plan_expires_at' => now()->addMonth()
+            'plan_expires_at' => now()->addMonth(),
         ]);
 
         Log::info('Successful Stripe Checkout', [
             'client_id' => $clientId,
-            'plan_id' => $planId
+            'plan_id' => $planId,
         ]);
     }
 
@@ -109,7 +109,7 @@ class StripeService
     {
         // Логика обработки оплаченного счета
         Log::info('Invoice Paid', [
-            'invoice_id' => $invoice->id
+            'invoice_id' => $invoice->id,
         ]);
     }
 }

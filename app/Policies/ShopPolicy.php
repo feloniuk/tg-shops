@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Shop;
+use App\Models\User;
 
 class ShopPolicy
 {
@@ -15,6 +15,7 @@ class ShopPolicy
     public function create(User $user): bool
     {
         $client = $user->client;
+
         return $client->canCreateShop() && $client->isSubscriptionActive();
     }
 

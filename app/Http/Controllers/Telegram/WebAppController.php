@@ -1,26 +1,26 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
-use App\Models\Shop;
 use App\Domains\Telegram\Services\WebAppService;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 
 class WebAppController extends Controller
 {
     public function getProducts(
-        Shop $shop, 
+        Shop $shop,
         WebAppService $webAppService,
         Request $request
     ) {
         $query = $request->input('query');
 
-        $products = $query 
+        $products = $query
             ? $webAppService->searchProducts($shop, $query)
             : $webAppService->getShopProducts($shop);
 
         return response()->json([
-            'products' => $products
+            'products' => $products,
         ]);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Domains\Client\Repositories;
 
 use App\Models\Client;
-use Illuminate\Support\Collection;
 
 class ClientRepository
 {
@@ -21,7 +20,7 @@ class ClientRepository
     {
         return $client->update([
             'plan_id' => $planId,
-            'plan_expires_at' => now()->addMonth()
+            'plan_expires_at' => now()->addMonth(),
         ]);
     }
 }

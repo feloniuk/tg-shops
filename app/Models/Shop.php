@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Shop extends Model
@@ -11,41 +11,44 @@ class Shop extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'client_id', 
-        'name', 
-        'telegram_bot_token', 
-        'welcome_message', 
-        'footer_message', 
+        'client_id',
+        'name',
+        'telegram_bot_token',
+        'welcome_message',
+        'footer_message',
         'design_settings',
-        'status'
+        'status',
     ];
 
-    protected $casts = [
-        'design_settings' => 'array',
-        'status' => 'string'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'design_settings' => 'array',
+            'status' => 'string',
+        ];
+    }
 
-    public function client()
+    public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
-    public function products()
+    public function products(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Product::class);
     }
 
-    public function categories()
+    public function categories(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ShopCategory::class);
     }
 
-    public function telegramBot()
+    public function telegramBot(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(TelegramBot::class);
     }
 
-    public function orders()
+    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Order::class);
     }

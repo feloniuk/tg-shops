@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class ProductImage extends Model
 {
@@ -13,12 +13,12 @@ class ProductImage extends Model
         'product_id',
         'path',
         'order',
-        'is_primary'
+        'is_primary',
     ];
 
     protected $casts = [
         'is_primary' => 'boolean',
-        'order' => 'integer'
+        'order' => 'integer',
     ];
 
     public function product()
@@ -29,6 +29,6 @@ class ProductImage extends Model
     // Получить URL изображения
     public function getUrlAttribute(): string
     {
-        return asset('storage/' . $this->path);
+        return asset('storage/'.$this->path);
     }
 }

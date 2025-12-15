@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
 use App\Models\Client;
 use App\Models\Plan;
+use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -14,11 +14,11 @@ class EnsureUserHasClient
     {
         $user = $request->user();
 
-        if (!$user->client) {
+        if (! $user->client) {
             // Создаем клиента, если его нет
             $freePlan = Plan::whereIn('name', ['Free', 'No Plan'])->first();
 
-            if (!$freePlan) {
+            if (! $freePlan) {
                 abort(500, 'Free plan not found. Please run database seeders.');
             }
 

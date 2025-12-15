@@ -34,11 +34,11 @@ class OrderStatusChangedMailable extends Mailable implements ShouldQueue
             'processing' => 'В обработке',
             'completed' => 'Выполнен',
             'cancelled' => 'Отменен',
-            'refunded' => 'Возврат'
+            'refunded' => 'Возврат',
         ];
 
         return new Envelope(
-            subject: 'Статус заказа #' . $this->order->id . ' изменен на "' . ($statusLabels[$this->order->status] ?? $this->order->status) . '"',
+            subject: 'Статус заказа #'.$this->order->id.' изменен на "'.($statusLabels[$this->order->status] ?? $this->order->status).'"',
         );
     }
 

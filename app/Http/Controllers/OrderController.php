@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderStatusChangedMailable;
 use App\Models\Order;
 use App\Models\Shop;
-use App\Mail\OrderStatusChangedMailable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -16,7 +16,7 @@ class OrderController extends Controller
     {
         $client = Auth::user()->client;
 
-        if (!$client) {
+        if (! $client) {
             abort(403, 'Client profile not found.');
         }
 
@@ -36,7 +36,7 @@ class OrderController extends Controller
     {
         $client = Auth::user()->client;
 
-        if (!$client) {
+        if (! $client) {
             abort(403, 'Client profile not found.');
         }
 
@@ -52,7 +52,7 @@ class OrderController extends Controller
     {
         $client = Auth::user()->client;
 
-        if (!$client) {
+        if (! $client) {
             abort(403, 'Client profile not found.');
         }
 
@@ -62,14 +62,14 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:pending,processing,completed,cancelled,refunded'
+            'status' => 'required|in:pending,processing,completed,cancelled,refunded',
         ]);
 
         // Сохраняем старый статус для email уведомления
         $oldStatus = $order->status;
 
         $order->update([
-            'status' => $request->status
+            'status' => $request->status,
         ]);
 
         // Отправка email уведомления клиенту при изменении статуса
@@ -81,7 +81,7 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'old_status' => $oldStatus,
                     'new_status' => $request->status,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         }

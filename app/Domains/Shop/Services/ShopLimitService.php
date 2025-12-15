@@ -2,9 +2,9 @@
 
 namespace App\Domains\Shop\Services;
 
-use App\Models\Client;
-use App\Domains\Shop\Repositories\ShopRepository;
 use App\Domains\Product\Repositories\ProductRepository;
+use App\Domains\Shop\Repositories\ShopRepository;
+use App\Models\Client;
 use Illuminate\Validation\ValidationException;
 
 class ShopLimitService
@@ -21,8 +21,8 @@ class ShopLimitService
         if ($currentShopsCount >= $client->plan->max_shops) {
             throw ValidationException::withMessages([
                 'shops' => __('shop.limits.max_shops_reached', [
-                    'limit' => $client->plan->max_shops
-                ])
+                    'limit' => $client->plan->max_shops,
+                ]),
             ]);
         }
     }
@@ -33,12 +33,12 @@ class ShopLimitService
         $currentProductsCount = $this->productRepository->countByShop($shopId);
 
         // Проверка лимита продуктов в плане
-        if (!$client->plan->hasUnlimitedProducts() && 
+        if (! $client->plan->hasUnlimitedProducts() &&
             $currentProductsCount >= $client->plan->max_products) {
             throw ValidationException::withMessages([
                 'products' => __('product.limits.max_products_reached', [
-                    'limit' => $client->plan->max_products
-                ])
+                    'limit' => $client->plan->max_products,
+                ]),
             ]);
         }
     }

@@ -2,8 +2,8 @@
 
 namespace App\Domains\Telegram\Services;
 
-use GuzzleHttp\Client;
 use App\Models\Shop;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -14,18 +14,18 @@ class TelegramBotService
     public function __construct()
     {
         $this->client = new Client([
-            'base_uri' => 'https://api.telegram.org/bot'
+            'base_uri' => 'https://api.telegram.org/bot',
         ]);
     }
 
     public function registerWebhook(Shop $shop, string $webhookUrl): bool
     {
         try {
-            $response = $this->client->post($shop->telegram_bot_token . '/setWebhook', [
+            $response = $this->client->post($shop->telegram_bot_token.'/setWebhook', [
                 'form_params' => [
                     'url' => $webhookUrl,
-                    'allowed_updates' => json_encode(['message', 'callback_query', 'inline_query'])
-                ]
+                    'allowed_updates' => json_encode(['message', 'callback_query', 'inline_query']),
+                ],
             ]);
 
             $botInfo = $this->getBotInfo($shop->telegram_bot_token);
@@ -34,9 +34,9 @@ class TelegramBotService
                 ['shop_id' => $shop->id],
                 [
                     'bot_token' => $shop->telegram_bot_token,
-                    'bot_username' => $botInfo['username'] ?? ('tg_shop_' . Str::random(8)),
+                    'bot_username' => $botInfo['username'] ?? ('tg_shop_'.Str::random(8)),
                     'webhook_info' => json_decode($response->getBody(), true),
-                    'is_active' => true
+                    'is_active' => true,
                 ]
             );
 
@@ -44,7 +44,7 @@ class TelegramBotService
         } catch (\Exception $e) {
             Log::error('Telegram Webhook Registration Failed', [
                 'shop_id' => $shop->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return false;
@@ -54,13 +54,13 @@ class TelegramBotService
     private function getBotInfo(string $token): ?array
     {
         try {
-            $response = $this->client->get($token . '/getMe');
+            $response = $this->client->get($token.'/getMe');
             $data = json_decode($response->getBody(), true);
-            
+
             return $data['result'] ?? null;
         } catch (\Exception $e) {
             Log::error('Failed to get Telegram Bot Info', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return null;
@@ -70,9 +70,9 @@ class TelegramBotService
     public function validateBotToken(string $token): bool
     {
         try {
-            $response = $this->client->get($token . '/getMe');
+            $response = $this->client->get($token.'/getMe');
             $data = json_decode($response->getBody(), true);
-            
+
             return $data['ok'] === true;
         } catch (\Exception $e) {
             return false;

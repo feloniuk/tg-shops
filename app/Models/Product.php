@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -21,34 +21,37 @@ class Product extends Model
         'allow_backorder',
         'characteristics',
         'image',
-        'is_active'
+        'is_active',
     ];
 
-    protected $casts = [
-        'characteristics' => 'array',
-        'price' => 'decimal:2',
-        'stock_quantity' => 'integer',
-        'track_stock' => 'boolean',
-        'allow_backorder' => 'boolean',
-        'is_active' => 'boolean'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'characteristics' => 'array',
+            'price' => 'decimal:2',
+            'stock_quantity' => 'integer',
+            'track_stock' => 'boolean',
+            'allow_backorder' => 'boolean',
+            'is_active' => 'boolean',
+        ];
+    }
 
-    public function shop()
+    public function shop(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Shop::class);
     }
 
-    public function category()
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(ShopCategory::class, 'category_id');
     }
 
-    public function images()
+    public function images(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('order');
     }
 
-    public function primaryImage()
+    public function primaryImage(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ProductImage::class)->where('is_primary', true);
     }
@@ -62,7 +65,7 @@ class Product extends Model
     public function isInStock(int $quantity = 1): bool
     {
         // Если не отслеживаем остатки, товар всегда доступен
-        if (!$this->track_stock) {
+        if (! $this->track_stock) {
             return true;
         }
 
@@ -77,15 +80,16 @@ class Product extends Model
     // Уменьшить остаток
     public function decrementStock(int $quantity): bool
     {
-        if (!$this->track_stock) {
+        if (! $this->track_stock) {
             return true;
         }
 
-        if ($this->stock_quantity < $quantity && !$this->allow_backorder) {
+        if ($this->stock_quantity < $quantity && ! $this->allow_backorder) {
             return false;
         }
 
         $this->decrement('stock_quantity', $quantity);
+
         return true;
     }
 
@@ -111,6 +115,6 @@ class Product extends Model
         }
 
         // Fallback на старое поле image
-        return $this->image ? asset('storage/' . $this->image) : null;
+        return $this->image ? asset('storage/'.$this->image) : null;
     }
 }

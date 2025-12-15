@@ -13,7 +13,20 @@
       "Bash(mkdir:*)",
       "Bash(test:*)",
       "Bash(cat:*)",
-      "Bash(del configlaravellocalization.php)"
+      "Bash(del configlaravellocalization.php)",
+      "mcp__laravel-boost__last-error",
+      "mcp__laravel-boost__read-log-entries",
+      "mcp__ide__getDiagnostics",
+      "mcp__laravel-boost__database-query",
+      "mcp__laravel-boost__tinker",
+      "Bash(vendor/bin/pint:*)",
+      "mcp__laravel-boost__application-info",
+      "Bash(php:*)",
+      "mcp__laravel-boost__get-absolute-url"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "laravel-boost"
+  ]
 }

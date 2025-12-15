@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Client;
-use App\Models\Shop;
 use App\Models\Order;
-use Illuminate\Support\Facades\DB;
+use App\Models\Shop;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -28,7 +27,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'stats' => $stats,
             'recentUsers' => $recentUsers,
-            'recentOrders' => $recentOrders
+            'recentOrders' => $recentOrders,
         ]);
     }
 }

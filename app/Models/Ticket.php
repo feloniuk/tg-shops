@@ -3,27 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ticket extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'client_id', 
-        'manager_id', 
-        'title', 
-        'description', 
-        'status', 
+        'client_id',
+        'manager_id',
+        'title',
+        'description',
+        'status',
         'priority',
-        'last_response_at'
+        'last_response_at',
     ];
 
     protected $casts = [
         'status' => 'string',
         'priority' => 'string',
-        'last_response_at' => 'datetime'
+        'last_response_at' => 'datetime',
     ];
 
     public function client()

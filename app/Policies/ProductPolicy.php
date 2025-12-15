@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\User;
 
 class ProductPolicy
 {
@@ -16,7 +16,8 @@ class ProductPolicy
     public function create(User $user, Shop $shop): bool
     {
         $client = $user->client;
-        return $client->id === $shop->client_id 
+
+        return $client->id === $shop->client_id
             && $client->isSubscriptionActive();
     }
 

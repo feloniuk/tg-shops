@@ -2,8 +2,8 @@
 
 namespace App\Domains\Telegram\Services;
 
-use App\Models\Shop;
 use App\Models\Product;
+use App\Models\Shop;
 use Illuminate\Support\Facades\Cache;
 
 class WebAppService
@@ -25,7 +25,7 @@ class WebAppService
             ->where('is_active', true)
             ->where(function ($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('description', 'LIKE', "%{$query}%");
+                    ->orWhere('description', 'LIKE', "%{$query}%");
             })
             ->get();
     }

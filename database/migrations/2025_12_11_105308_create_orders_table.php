@@ -19,11 +19,11 @@ return new class extends Migration
             $table->string('customer_email')->nullable();
             $table->decimal('total_amount', 10, 2);
             $table->enum('status', [
-                'pending', 
-                'processing', 
-                'completed', 
-                'cancelled', 
-                'refunded'
+                'pending',
+                'processing',
+                'completed',
+                'cancelled',
+                'refunded',
             ])->default('pending');
             $table->json('order_details');
             $table->text('customer_comment')->nullable();

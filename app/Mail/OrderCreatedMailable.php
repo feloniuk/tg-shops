@@ -29,7 +29,7 @@ class OrderCreatedMailable extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Новый заказ #' . $this->order->id . ' - ' . $this->order->shop->name,
+            subject: 'Новый заказ #'.$this->order->id.' - '.$this->order->shop->name,
         );
     }
 
@@ -45,8 +45,8 @@ class OrderCreatedMailable extends Mailable implements ShouldQueue
                 'shop' => $this->order->shop,
                 'orderUrl' => route('orders.show', [
                     'shop' => $this->order->shop_id,
-                    'order' => $this->order->id
-                ])
+                    'order' => $this->order->id,
+                ]),
             ]
         );
     }

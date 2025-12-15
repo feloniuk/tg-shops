@@ -10,19 +10,19 @@ class AuditLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 
-        'event_type', 
-        'model_type', 
-        'model_id', 
-        'old_data', 
-        'new_data', 
-        'ip_address', 
-        'user_agent'
+        'user_id',
+        'event_type',
+        'model_type',
+        'model_id',
+        'old_data',
+        'new_data',
+        'ip_address',
+        'user_agent',
     ];
 
     protected $casts = [
         'old_data' => 'array',
-        'new_data' => 'array'
+        'new_data' => 'array',
     ];
 
     public function user()
